@@ -205,23 +205,28 @@ static  SourceType _sourceType = SourceTypeLaunchImage;
 }
 
 -(void)setupLaunchAd{
-    UIWindow *window;
-    if (@available(iOS 13.0, *)) {
-        NSArray *array =[[[UIApplication sharedApplication] connectedScenes] allObjects];
-        UIWindowScene *windowScene = (UIWindowScene *)array.firstObject;
-        window = [[UIWindow alloc] initWithWindowScene:windowScene];
-        window.frame = windowScene.coordinateSpace.bounds;
-    } else {
-        window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    }
+    UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     window.rootViewController = [XHLaunchAdController new];
     window.rootViewController.view.backgroundColor = [UIColor clearColor];
     window.rootViewController.view.userInteractionEnabled = NO;
     window.windowLevel = UIWindowLevelStatusBar + 1;
     window.hidden = NO;
     window.alpha = 1;
+    if (@available(iOS 13, *)) {
+        //两部分 修正最终结果
+        [[NSNotificationCenter defaultCenter]addObserverForName:UISceneWillConnectNotification object:nil queue:nil usingBlock:^(NSNotification * _Nonnull note) {
+                window.windowScene = note.object;
+        }];
+        if ([UIApplication sharedApplication].windows.count > 0) {
+            for (UIWindow *defaultWindow in [UIApplication sharedApplication].windows) {
+                if (defaultWindow.windowLevel == UIWindowLevelNormal) {
+                    window.windowScene = defaultWindow.windowScene;
+                }
+            }
+        }
+    }
     _window = window;
-    /** 添加launchImageView */
+    /* 添加launchImageView */
     [_window addSubview:[[XHLaunchImageView alloc] initWithSourceType:_sourceType]];
 }
 
