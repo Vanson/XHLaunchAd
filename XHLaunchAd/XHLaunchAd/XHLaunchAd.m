@@ -214,8 +214,9 @@ static  SourceType _sourceType = SourceTypeLaunchImage;
     window.alpha = 1;
     if (@available(iOS 13, *)) {
         //两部分 修正最终结果
+        __weak UIWindow *weakWindow = window;
         [[NSNotificationCenter defaultCenter]addObserverForName:UISceneWillConnectNotification object:nil queue:nil usingBlock:^(NSNotification * _Nonnull note) {
-                window.windowScene = note.object;
+            weakWindow.windowScene = note.object;
         }];
         if ([UIApplication sharedApplication].windows.count > 0) {
             for (UIWindow *defaultWindow in [UIApplication sharedApplication].windows) {
